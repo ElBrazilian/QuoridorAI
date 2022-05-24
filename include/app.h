@@ -15,6 +15,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "timekeeper.h"
+#include "game.h"
 
 
 #define MAX_TITLE_LENGTH 200
@@ -32,8 +33,10 @@ typedef struct {
     TimeKeeper *keeper;
 
     TTF_Font *debug_font;
+    bool debug_draw;
 
-
+    //GAME
+    Game *game;
 
     bool continuer;
 } App;

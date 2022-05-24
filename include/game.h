@@ -14,30 +14,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-
-#include "app.h"
+#include <string.h>
 
 #define GRID_SIZE 9
 #define MAX_NUM_WALLS 20
 #define MAX_NAME_SIZE 150
 
-typedef struct Point {
+typedef struct {
     int x, y;
 } Point;
 
-typedef struct Player {
+typedef struct {
     char name[MAX_NAME_SIZE];
     Point *pos; 
 } Player;
 
-typedef struct Wall {
+typedef struct {
     Point *endA;
     Point *endB;
 
     Player *placed_by;
 } Wall;
 
-typedef struct Game {
+typedef struct {
     Player *playerA;
     Player *playerB;
 

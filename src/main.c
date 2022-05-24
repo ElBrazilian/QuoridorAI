@@ -30,13 +30,20 @@ void initialize_app(App *app){
     // Load the debug font and init TTF
     TTF_Init();
     app->debug_font = TTF_OpenFont("fonts/SpaceMono-Regular.ttf", DEBUG_FONT_SIZE);
+    app->debug_draw = DRAW_DEBUG_ON_START;
 
+    // Create game
+    app->game = create_game(
+        PLAYERA_NAME, create_point(PLAYERA_POSX, PLAYERA_POSY),
+        PLAYERB_NAME, create_point(PLAYERB_POSX, PLAYERB_POSY)
+    );
 
     app->continuer = true;
 }
 
 void destroy_app(App *app){
     destroy_timekeeper(app->keeper);
+    // delete_game(app->game);
 
     SDL_DestroyRenderer(app->renderer);
     SDL_DestroyWindow(app->window);
@@ -66,7 +73,7 @@ int main(int argc, char *argv[]){
         // DRAW
         SDL_SetRenderDrawColor(app->renderer, 0,0,0,255);
         SDL_RenderClear(app->renderer);
-        timekeeper_draw_debug_info(app->keeper, app->renderer, app->debug_font);
+        if (app->debug_draw) timekeeper_draw_debug_info(app->keeper, app->renderer, app->debug_font);
         draw(app);
         SDL_RenderPresent(app->renderer);
         update_timekeeper_draw(app->keeper);
