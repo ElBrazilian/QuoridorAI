@@ -1,0 +1,4 @@
+main
+game.o
+timekeeper.o
+main.o

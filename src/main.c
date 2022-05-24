@@ -102,6 +102,12 @@ void handle_events(App *app){
     while(SDL_PollEvent(&e)){
         if (e.type == SDL_QUIT){
             app->continuer = false;
+        } else if (e.type == SDL_KEYDOWN){
+            if (e.key.keysym.sym == SDLK_d){
+                app->debug_draw = !app->debug_draw;
+            } else if (e.key.keysym.sym == SDLK_ESCAPE){
+                app->continuer = false;
+            }
         }
     }
 }
