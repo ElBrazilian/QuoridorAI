@@ -2,7 +2,7 @@
  * @file main.h
  * @author Nathan Schiffmacher (nathan.schiffmacher@student.isae-supaero.fr)
  * @brief 
- * @date 19-03-2022
+ * @date 24-05-2022
  * 
  * @copyright Copyright (c) 2022
  * 
@@ -36,4 +36,8 @@ void initialize_app(App *app);
  * @param app 
  */
 void destroy_app(App *app);
+
+void update(App *app);
+void handle_events(App *app);
+void draw(App *app);
 #endif
