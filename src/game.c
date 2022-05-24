@@ -1,9 +1,7 @@
 #include "game.h"
 
 
-
-
-// POINT
+// POIN
 Point *create_point(int x, int y){
     Point *point  = malloc(sizeof(Point));
     point->x       = x;
