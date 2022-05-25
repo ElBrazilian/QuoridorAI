@@ -65,3 +65,66 @@ void delete_game(Game *game){
     }
     free(game);
 }
+
+void draw_grid(App *app){
+    // draw game background
+
+    SDL_Rect r;
+    r.x = GRID_OFFSET_SIZE;
+    r.y = GRID_OFFSET_SIZE;
+    r.w = GRID_EFFECTIVE_SIZE;
+    r.h = GRID_EFFECTIVE_SIZE;
+    SDL_SetRenderDrawColor(app->renderer, GAME_COLOR);
+    SDL_RenderFillRect(app->renderer, &r);
+   
+    // draw inner 
+    SDL_SetRenderDrawColor(app->renderer, GRID_COLOR);
+    for (int index = 1; index < GRID_SIZE; index++){
+        int local_pos = index * GRID_CELL_SIZE;
+
+        // vertical line
+        r.x = GRID_OFFSET_SIZE + local_pos - GRID_WIDTH/2;
+        r.y = GRID_OFFSET_SIZE + 0 - GRID_WIDTH/2;
+        r.w = GRID_WIDTH;
+        r.h = GRID_EFFECTIVE_SIZE + GRID_WIDTH;
+        SDL_RenderFillRect(app->renderer, &r);
+
+        // horizontal line
+        r.x = GRID_OFFSET_SIZE + 0 - GRID_WIDTH/2;
+        r.y = GRID_OFFSET_SIZE + local_pos - GRID_WIDTH/2;
+        r.w = GRID_WIDTH + GRID_EFFECTIVE_SIZE;
+        r.h = GRID_WIDTH;
+        SDL_RenderFillRect(app->renderer, &r);
+
+        // thickLineRGBA(app->renderer, GRID_OFFSET_SIZE + local_pos, GRID_OFFSET_SIZE, GRID_OFFSET_SIZE + local_pos, GRID_OFFSET_SIZE + GRID_EFFECTIVE_SIZE, GRID_WIDTH, GRID_COLOR);
+        // thickLineRGBA(app->renderer, GRID_OFFSET_SIZE, GRID_OFFSET_SIZE + local_pos, GRID_OFFSET_SIZE + GRID_EFFECTIVE_SIZE, GRID_OFFSET_SIZE + local_pos, GRID_WIDTH, GRID_COLOR);
+    }
+
+    // draw outer
+
+    SDL_SetRenderDrawColor(app->renderer, OUTER_GRID_COLOR);
+    // left line
+    r.x = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.y = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.w = OUTER_GRID_WIDTH;
+    r.h = GRID_EFFECTIVE_SIZE + OUTER_GRID_WIDTH;
+    SDL_RenderFillRect(app->renderer, &r);
+    // right line
+    r.x = GRID_OFFSET_SIZE + GRID_EFFECTIVE_SIZE - OUTER_GRID_WIDTH/2;
+    r.y = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.w = OUTER_GRID_WIDTH;
+    r.h = GRID_EFFECTIVE_SIZE + OUTER_GRID_WIDTH;
+    SDL_RenderFillRect(app->renderer, &r);
+    // top line
+    r.x = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.y = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.w = GRID_EFFECTIVE_SIZE + OUTER_GRID_WIDTH;
+    r.h = OUTER_GRID_WIDTH;
+    SDL_RenderFillRect(app->renderer, &r);
+    // bottom line
+    r.x = GRID_OFFSET_SIZE + 0 - OUTER_GRID_WIDTH/2;
+    r.y = GRID_OFFSET_SIZE + GRID_EFFECTIVE_SIZE - OUTER_GRID_WIDTH/2;
+    r.w = GRID_EFFECTIVE_SIZE + OUTER_GRID_WIDTH;
+    r.h = OUTER_GRID_WIDTH;
+    SDL_RenderFillRect(app->renderer, &r);
+}

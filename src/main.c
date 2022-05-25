@@ -1,7 +1,5 @@
 #include "main.h"
 
-#define TARGET_FPS 60
-
 
 void initialize_app(App *app){
     // Initialize SDL
@@ -73,8 +71,8 @@ int main(int argc, char *argv[]){
         // DRAW
         SDL_SetRenderDrawColor(app->renderer, 0,0,0,255);
         SDL_RenderClear(app->renderer);
-        if (app->debug_draw) timekeeper_draw_debug_info(app->keeper, app->renderer, app->debug_font);
         draw(app);
+        if (app->debug_draw) timekeeper_draw_debug_info(app->keeper, app->renderer, app->debug_font);
         SDL_RenderPresent(app->renderer);
         update_timekeeper_draw(app->keeper);
 
@@ -113,4 +111,5 @@ void handle_events(App *app){
 }
 
 void draw(App *app){
+    draw_grid(app);
 }

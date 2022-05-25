@@ -2,8 +2,8 @@ _GUI = $(if $(NOGUI),, -D GUI)
 _DEBUG = $(if $(DEBUG),-D DEBUG,)
 _OPT = $(if $(OPT),-O3 -flto,)
 CC = gcc
-CFLAGS = -g -std=c99 -Wall $(_OPT) $(_GUI) $(_DEBUG) -I./include 
-LDFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_image -lm
+CFLAGS = -g -std=c99 -Wall $(_OPT) $(_GUI) $(_DEBUG) -I./include -I/usr/include
+LDFLAGS = -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_image -lm -lSDL2_gfx
 
 .PHONY: clean doc check-syntax compile-all launch-tests
 

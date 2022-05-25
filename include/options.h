@@ -12,24 +12,17 @@
 #ifndef H_OPTIONS
 #define H_OPTIONS
 
+#define SIZE 920
+#define WIDTH SIZE
+#define HEIGHT SIZE
+
+#define TARGET_FPS 90
+
 #define BASE_WINDOW_TITLE "Idk"
 #define BASE_WINDOW_X_POS 50
 #define BASE_WINDOW_Y_POS 0
 
-#define DRAW_DEBUG_ON_START false
 
-// Player A
-#define PLAYERA_NAME "Player A"
-#define PLAYERA_POSX 0
-#define PLAYERA_POSY 4
-
-// Player B
-#define PLAYERB_NAME "Player B"
-#define PLAYERB_POSX 8
-#define PLAYERB_POSY 4
-
-#define WIDTH 1280
-#define HEIGHT 720
 
 
 
