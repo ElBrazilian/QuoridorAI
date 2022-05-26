@@ -37,6 +37,8 @@ typedef struct {
 
     //GAME
     Game *game;
+    Point *mouse_pos;
+    Uint32 mouse_state;
 
     bool continuer;
 } App;

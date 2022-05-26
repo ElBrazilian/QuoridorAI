@@ -23,6 +23,13 @@ Player *create_player(char name[], Point *base_pos){
 
     return player;
 }
+bool player_can_move_pawn(Player *player, Game *game){
+    return true;
+    // return player == game->playerA;
+}
+bool player_can_place_pawn(Game *game, Point p){
+    return true;
+}
 
 void delete_player(Player *player){
     free(player->pos);
@@ -68,6 +75,7 @@ Game *create_game(char playerA_name[], Point *playerA_pos, char playerB_name[], 
     game->placed_walls = malloc(MAX_NUM_WALLS * sizeof(Wall *));
     game->playerA = create_player(playerA_name, playerA_pos);
     game->playerB = create_player(playerB_name, playerB_pos);
+    game->dragged_player = NULL;
 
     return game;
 }
@@ -85,6 +93,14 @@ void player_pos_to_pixel_pos(Player *player, Point *pixel_pos){
     pixel_pos->x = GRID_OFFSET_SIZE + player->pos->x * GRID_CELL_SIZE + GRID_CELL_SIZE / 2;
     pixel_pos->y = GRID_OFFSET_SIZE + player->pos->y * GRID_CELL_SIZE + GRID_CELL_SIZE / 2;
 }
+void grid_pos_to_pixel_pos(Point *grid_pos, Point *pixel_pos){
+    pixel_pos->x = GRID_OFFSET_SIZE + grid_pos->x * GRID_CELL_SIZE + GRID_CELL_SIZE / 2;
+    pixel_pos->y = GRID_OFFSET_SIZE + grid_pos->y * GRID_CELL_SIZE + GRID_CELL_SIZE / 2;
+}
+void pixel_pos_to_player_pos(Point *pixel_pos, Point *player_pos){
+    player_pos->x = (pixel_pos->x - GRID_OFFSET_SIZE) / GRID_CELL_SIZE;
+    player_pos->y = (pixel_pos->y - GRID_OFFSET_SIZE) / GRID_CELL_SIZE;
+}
 void wall_pos_to_pixel_pos(Wall *wall, Point *a, Point *b){
     a->x = GRID_OFFSET_SIZE + wall->endA->x * GRID_CELL_SIZE;
     a->y = GRID_OFFSET_SIZE + wall->endA->y * GRID_CELL_SIZE;
@@ -95,8 +111,8 @@ void wall_pos_to_pixel_pos(Wall *wall, Point *a, Point *b){
 
 void draw_game(App *app){
     draw_grid(app);
-    draw_players(app);
     draw_walls(app);
+    draw_players(app);
 }
 
 void draw_players(App *app){
@@ -104,12 +120,22 @@ void draw_players(App *app){
     Game *game = app->game;
 
     // draw player A
-    player_pos_to_pixel_pos(game->playerA, &p);
+    if (game->dragged_player == game->playerA){
+        p.x = app->mouse_pos->x;
+        p.y = app->mouse_pos->y;
+    } else {
+        player_pos_to_pixel_pos(game->playerA, &p);
+    }
     SDL_SetRenderDrawColor(app->renderer, PLAYERA_COLOR);
     SDL_RenderFillCircle(app->renderer, p.x, p.y, PLAYER_RADIUS);
 
     // draw player B
-    player_pos_to_pixel_pos(game->playerB, &p);
+    if (game->dragged_player == game->playerB){
+        p.x = app->mouse_pos->x;
+        p.y = app->mouse_pos->y;
+    } else {
+        player_pos_to_pixel_pos(game->playerB, &p);
+    }
     SDL_SetRenderDrawColor(app->renderer, PLAYERB_COLOR);
     SDL_RenderFillCircle(app->renderer, p.x, p.y, PLAYER_RADIUS);
 }

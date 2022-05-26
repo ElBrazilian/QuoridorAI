@@ -35,6 +35,8 @@ void initialize_app(App *app){
         PLAYERA_NAME, create_point(PLAYERA_POSX, PLAYERA_POSY),
         PLAYERB_NAME, create_point(PLAYERB_POSX, PLAYERB_POSY)
     );
+    app->mouse_pos      = create_point(0,0);
+    app->mouse_state    = 0;
 
     Point a, b;
     a.x = 1;
@@ -73,6 +75,9 @@ int main(int argc, char *argv[]){
     initialize_app(app);
 
     while(app->continuer){
+        // update mouse pos
+        app->mouse_state = SDL_GetMouseState(&(app->mouse_pos->x), &(app->mouse_pos->y));
+
         // HANDLING EVENTS
         handle_events(app);
         update_timekeeper_handle(app->keeper);
@@ -85,10 +90,10 @@ int main(int argc, char *argv[]){
         SDL_SetRenderDrawColor(app->renderer, 0,0,0,255);
         SDL_RenderClear(app->renderer);
         draw(app);
+
         if (app->debug_draw) timekeeper_draw_debug_info(app->keeper, app->renderer, app->debug_font);
         SDL_RenderPresent(app->renderer);
         update_timekeeper_draw(app->keeper);
-
 
         // DELAY TO STAY AT TARGET FPS
         timekeeper_limit(app->keeper);
@@ -118,6 +123,33 @@ void handle_events(App *app){
                 app->debug_draw = !app->debug_draw;
             } else if (e.key.keysym.sym == SDLK_ESCAPE){
                 app->continuer = false;
+            }
+        } else if (e.type == SDL_MOUSEBUTTONDOWN){
+            if (e.button.button == SDL_BUTTON_LEFT){
+                // On button press
+                Point p;
+                pixel_pos_to_player_pos(app->mouse_pos, &p);
+                if (p.x == app->game->playerA->pos->x && p.y == app->game->playerA->pos->y){
+                    if (player_can_move_pawn(app->game->playerA, app->game)){
+                        app->game->dragged_player = app->game->playerA;
+                    }
+                } else if (p.x == app->game->playerB->pos->x && p.y == app->game->playerB->pos->y){
+                    if (player_can_move_pawn(app->game->playerB, app->game)){
+                        app->game->dragged_player = app->game->playerB;
+                    }
+                }
+            }
+        } else if (e.type == SDL_MOUSEBUTTONUP){
+            if (e.button.button == SDL_BUTTON_LEFT){
+                if (app->game->dragged_player != NULL){
+                    Point p;
+                    pixel_pos_to_player_pos(app->mouse_pos, &p);
+                    if (player_can_place_pawn(app->game, p)){
+                        app->game->dragged_player->pos->x   = p.x;
+                        app->game->dragged_player->pos->y   = p.y;
+                        app->game->dragged_player           = NULL;
+                    }
+                }
             }
         }
     }

@@ -76,6 +76,8 @@ typedef struct {
     Player *playerA;
     Player *playerB;
 
+    Player *dragged_player;
+
     Wall **placed_walls;
     int num_placed_walls;
 } Game;
@@ -86,6 +88,8 @@ void delete_point(Point *point);
 
 // PLAYER
 Player *create_player(char name[], Point *base_pos);
+bool player_can_move_pawn(Player *player, Game *game); // TODO 
+bool player_can_place_pawn(Game *game, Point p); // TODO: Return true if the player current dragging a pawn can place here 
 void delete_player(Player *player);
 
 // WALL 
@@ -103,6 +107,8 @@ void delete_game(Game *game);
  * @brief transforms a grid position (3,4) for instance to a pixel position on the screen
  */
 void player_pos_to_pixel_pos(Player *player, Point *pixel_pos);
+void grid_pos_to_pixel_pos(Point *grid_pos, Point *pixel_pos);
+void pixel_pos_to_player_pos(Point *pixel_pos, Point *player_pos);
 void wall_pos_to_pixel_pos(Wall *wall, Point *a, Point *b);
 void draw_game(App *app);
 void draw_players(App *app);
