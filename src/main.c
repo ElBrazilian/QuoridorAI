@@ -45,13 +45,20 @@ void initialize_app(App *app){
     b.y = 1;
     add_wall_to_game(app->game, app->game->playerA, a, b);
     
-    a.x = 2;
-    a.y = 1;
-    b.x = 2;
-    b.y = 3;
-    add_wall_to_game(app->game, app->game->playerA, a, b);
+    // a.x = 2;
+    // a.y = 1;
+    // b.x = 2;
+    // b.y = 3;
+    // add_wall_to_game(app->game, app->game->playerA, a, b);
 
-    app->continuer = true;
+    app->game->can_place_wall   = true;
+    app->game->corner_hovered   = create_point(-1,-1);
+    app->game->close_to_corner  = false;
+    app->game->corner_placed    = create_point(-1,-1);
+    // app->game->tmp_wall         = malloc(sizeof(Wall));
+
+    app->continuer              = true;
+
 }
 
 void destroy_app(App *app){
@@ -111,6 +118,9 @@ int main(int argc, char *argv[]){
 
 
 void update(App *app){
+    Game *game = app->game;
+
+    game->can_place_wall = (game->dragged_player == NULL);
 }
 
 void handle_events(App *app){
@@ -137,6 +147,21 @@ void handle_events(App *app){
                     if (player_can_move_pawn(app->game->playerB, app->game)){
                         app->game->dragged_player = app->game->playerB;
                     }
+                } else if (app->game->can_place_wall && app->game->close_to_corner) {
+                    // placing a wall
+
+                    if (app->game->corner_placed->x == -1 || app->game->corner_placed->y == -1){
+                        // placing the first corner of the wall
+                        app->game->corner_placed->x = app->game->corner_hovered->x;
+                        app->game->corner_placed->y = app->game->corner_hovered->y;
+                    } else {
+                        // placing the entire wall if possible
+                        if (wall_placable(app->game->corner_placed, app->game->corner_hovered)){
+                            add_wall_to_game(app->game, app->game->current_turn, *(app->game->corner_placed), *(app->game->corner_hovered));
+                            app->game->corner_placed->x = -1;
+                            app->game->corner_placed->y = -1;
+                        }
+                    }
                 }
             }
         } else if (e.type == SDL_MOUSEBUTTONUP){
@@ -153,6 +178,9 @@ void handle_events(App *app){
             }
         }
     }
+
+    // Checks if the mouse is close enough to a corner
+    app->game->close_to_corner = find_closest_corner(app->mouse_pos, app->game->corner_hovered);
 }
 
 void draw(App *app){
