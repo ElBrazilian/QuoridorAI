@@ -24,11 +24,119 @@ Player *create_player(char name[], Point *base_pos){
     return player;
 }
 bool player_can_move_pawn(Player *player, Game *game){
-    return true;
+    return game->current_turn == player;
     // return player == game->playerA;
 }
+bool wall_block_path(Game *game, Point a, Point b){
+    for (int i = 0; i < game->num_placed_walls; i++){
+        Wall *wall = game->placed_walls[i];
+        if (a.x == b.x){
+            // in the vertical position
+            // so a wall can block only if the wall is horizontal
+            if (wall->endA->y == wall->endB->y){
+                if (((a.y < b.y) && (a.y < wall->endA->y && wall->endA->y <= b.y)) || ((a.y > b.y) && (b.y < wall->endA->y && wall->endA->y <= a.y))) {
+                    if (((wall->endA->x < wall->endB->x) && (wall->endA->x <= a.x && a.x < wall->endB->x)) || ((wall->endA->x > wall->endB->x) && (wall->endB->x <= a.x && a.x < wall->endA->x))){
+                        return true;
+                    }
+                }
+            }
+        } else if (a.y == b.y){
+            // in the horizontal position
+            // so a wall can block only if the wall is vertical
+            if (wall->endA->x == wall->endB->x){
+                if (((a.x < b.x) && (a.x < wall->endA->x && wall->endA->x <= b.x)) || ((a.x > b.x) && (b.x < wall->endA->x && wall->endA->x <= a.x))) {
+                    if (((wall->endA->y < wall->endB->y) && (wall->endA->y <= a.y && a.y < wall->endB->y)) || ((wall->endA->y > wall->endB->y) && (wall->endB->y <= a.y && a.y < wall->endA->y))){
+                        return true;
+                    }
+                }
+            }
+        }
+    } 
+    return false;
+}
+void update_next_pawn_position(Game *game, int *current_overflow_index, int i, int dx, int dy){
+    Player *other_player = NULL;
+    if (game->current_turn == game->playerA)    other_player = game->playerB;
+    else                                        other_player = game->playerA;
+
+    // printf("%d,%d => %d,%d, (%d)\n", game->available_positions[i]->x,game->available_positions[i]->y,other_player->pos->x,other_player->pos->y,(!(game->available_positions[i]->x == other_player->pos->x && game->available_positions[i]->y == other_player->pos->y)));
+
+    game->available_positions[i]->x = game->current_turn->pos->x+dx;
+    game->available_positions[i]->y = game->current_turn->pos->y+dy;
+    
+    if (wall_block_path(game, *(game->available_positions[i]), *(game->current_turn->pos))){
+        // BLOCKED SO WE SKIP THIS ONE
+        game->available_positions[i]->x = -1;
+        game->available_positions[i]->y = -1;
+        return;
+    }
+        
+    if ((game->available_positions[i]->x == other_player->pos->x && game->available_positions[i]->y == other_player->pos->y))
+    {
+        // a player blocks this position
+        game->available_positions[i]->x += dx;
+        game->available_positions[i]->y += dy;
+        if (wall_block_path(game, *(game->available_positions[i]), *(game->current_turn->pos))){
+            // BLOCKED SO WE CHECK THE OTHER ONES
+
+            Point tmp_next;
+            if (dy == 0){
+                tmp_next.x = game->current_turn->pos->x+dx; 
+                
+                for (int ddy = -1; ddy <= 1; ddy += 2){
+                    tmp_next.y = game->current_turn->pos->y - ddy;
+                    if (!wall_block_path(game, tmp_next, *(other_player->pos))){
+                        game->available_positions[*current_overflow_index]->x = tmp_next.x;
+                        game->available_positions[*current_overflow_index]->y = tmp_next.y;
+                        (*current_overflow_index)++;
+                    }
+                }
+            } else if (dx == 0){
+                tmp_next.y = game->current_turn->pos->y+dy; 
+                
+                for (int ddx = -1; ddx <= 1; ddx += 2){
+                    tmp_next.x = game->current_turn->pos->x - ddx;
+                    if (!wall_block_path(game, tmp_next, *(other_player->pos))){
+                        game->available_positions[*current_overflow_index]->x = tmp_next.x;
+                        game->available_positions[*current_overflow_index]->y = tmp_next.y;
+                        (*current_overflow_index)++;
+                    }
+                }
+            } else {
+                printf("[ERROR] In update_next_pawn_position\n");
+            }
+            game->available_positions[i]->x = -1;
+            game->available_positions[i]->y = -1;
+        }
+    }
+
+}
+void update_available_pawn_positions(Game *game){
+    // check to the left
+    // Player *other_player = NULL;
+    // if (game->current_turn == game->playerA)    other_player = game->playerB;
+    // else                                        other_player = game->playerA;
+    // clear available positions
+    for (int i = 0; i < 10; i++){
+        game->available_positions[i]->x = -1;
+        game->available_positions[i]->y = -1;
+    }
+    int current_overflow_index = 4;
+
+
+    update_next_pawn_position(game, &current_overflow_index, 0, 1, 0);
+    update_next_pawn_position(game, &current_overflow_index, 1, -1, 0);
+    update_next_pawn_position(game, &current_overflow_index, 2, 0, 1);
+    update_next_pawn_position(game, &current_overflow_index, 3, 0, -1);
+}
 bool player_can_place_pawn(Game *game, Point p){
-    return true;
+    // ie is p in the available positions,
+    for (int i = 0; i < MAX_AVAILABLE_POSITIONS; i++){
+        if (p.x == game->available_positions[i]->x && p.y == game->available_positions[i]->y){
+            return true;
+        }
+    }    
+    return false;
 }
 
 void delete_player(Player *player){
@@ -106,7 +214,22 @@ Game *create_game(char playerA_name[], Point *playerA_pos, char playerB_name[], 
     game->current_turn = game->playerA;
     game->dragged_player = NULL;
 
+    game->available_positions = malloc(MAX_AVAILABLE_POSITIONS * sizeof(Point *));
+    for (int i = 0; i < MAX_AVAILABLE_POSITIONS; i++){
+        game->available_positions[i] = create_point(-1,-1);
+    }
+
     return game;
+}
+void change_turn(App *app){
+    if (app->game->current_turn == app->game->playerA){
+        app->game->current_turn = app->game->playerB;
+    } else if (app->game->current_turn == app->game->playerB){
+        app->game->current_turn = app->game->playerA;
+    } else {
+        printf("[ERROR] Invalid current player\n");
+        app->continuer = false;
+    }
 }
 
 void delete_game(Game *game){
@@ -115,6 +238,10 @@ void delete_game(Game *game){
     for (int i = 0; i < game->num_placed_walls; i++){
         delete_wall(game->placed_walls[i]);
     }
+    for (int i = 0; i < MAX_AVAILABLE_POSITIONS; i++){
+        free(game->available_positions[i]);
+    }
+    free(game->available_positions);
     free(game);
 }
 
@@ -145,6 +272,18 @@ void pixel_pos_to_player_pos(Point *pixel_pos, Point *player_pos){
 void draw_game(App *app){
     Game *game = app->game;
     Point p;
+    SDL_Rect r = {0, 0, WIDTH, GRID_CELL_SIZE};
+
+    // DEBUG DRAW TO SHOW WHICH PLAYER IS PLAYING
+    if (game->current_turn == game->playerA){
+        SDL_SetRenderDrawColor(app->renderer, PLAYERA_COLOR);
+    } else if (game->current_turn == game->playerB) {
+        SDL_SetRenderDrawColor(app->renderer, PLAYERB_COLOR);
+    } else {
+        app->continuer = false;
+        printf("[ERROR] Invalid current player\n");
+    }
+    SDL_RenderFillRect(app->renderer, &r);
 
     draw_grid(app);
     draw_walls(app);
@@ -178,6 +317,20 @@ void draw_players(App *app){
     Point p;
     Game *game = app->game;
 
+    // draw available positions for the current player
+    if (game->dragged_player != NULL){
+        SDL_SetRenderDrawColor(app->renderer, AVAILABLE_POSITION_COLOR);
+        for (int i = 0; i < MAX_AVAILABLE_POSITIONS; i++){
+            Point cur = *(app->game->available_positions[i]);
+            Point p = {0,0};
+
+            if (cur.x >= 0 && cur.x < GRID_SIZE && cur.y >= 0 && cur.y < GRID_SIZE){
+                grid_pos_to_pixel_pos(&cur, &p);
+                SDL_RenderFillCircle(app->renderer, p.x, p.y, PLAYER_RADIUS);
+            }
+        }
+    }
+
     // draw player A
     if (game->dragged_player == game->playerA){
         p.x = app->mouse_pos->x;
@@ -197,6 +350,7 @@ void draw_players(App *app){
     }
     SDL_SetRenderDrawColor(app->renderer, PLAYERB_COLOR);
     SDL_RenderFillCircle(app->renderer, p.x, p.y, PLAYER_RADIUS);
+
 }
 
 void draw_walls(App *app){

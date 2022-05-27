@@ -119,7 +119,9 @@ int main(int argc, char *argv[]){
 
 void update(App *app){
     Game *game = app->game;
-
+    if (game->dragged_player != NULL){
+        update_available_pawn_positions(app->game);
+    }
     game->can_place_wall = (game->dragged_player == NULL);
 }
 
@@ -170,9 +172,24 @@ void handle_events(App *app){
                     Point p;
                     pixel_pos_to_player_pos(app->mouse_pos, &p);
                     if (player_can_place_pawn(app->game, p)){
+                        // UPDATE THE PLAYERS POSITION
                         app->game->dragged_player->pos->x   = p.x;
                         app->game->dragged_player->pos->y   = p.y;
                         app->game->dragged_player           = NULL;
+
+                        if (app->game->playerA->pos->x == GRID_SIZE-1){
+                            // Player A win
+                            app->continuer = false;
+                            printf("Player A win\n");
+                        } else if (app->game->playerB->pos->x == 0){
+                            app->continuer = false;
+                            printf("Player B win\n");
+                        } else {
+                            change_turn(app);
+                        }
+                    } else {
+                        // release the player in it's prev position
+                        app->game->dragged_player = NULL;
                     }
                 }
             }

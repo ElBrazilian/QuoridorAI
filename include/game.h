@@ -22,6 +22,7 @@
 #define GRID_SIZE 9
 #define MAX_NUM_WALLS 20
 #define MAX_NAME_SIZE 150
+#define MAX_AVAILABLE_POSITIONS 10
 
 // DRAW OPTIONS
 #define DRAW_DEBUG_ON_START false
@@ -67,6 +68,8 @@
 #define PLAYERB_POSY 4
 #define PLAYERB_COLOR 0,255,0,255
 
+#define AVAILABLE_POSITION_COLOR 180,180,180,255
+
 typedef struct {
     int x, y;
 } Point;
@@ -97,6 +100,7 @@ typedef struct {
     bool can_place_wall;
     Point *corner_hovered;
     Point *corner_placed;
+    Point **available_positions;
     // Wall *tmp_wall;
     bool close_to_corner;
 } Game;
@@ -108,6 +112,9 @@ void delete_point(Point *point);
 // PLAYER
 Player *create_player(char name[], Point *base_pos);
 bool player_can_move_pawn(Player *player, Game *game); // TODO 
+bool wall_block_path(Game *game, Point a, Point b); // returns true if a wall blocks the path
+void update_next_pawn_position(Game *game, int *current_overflow_index, int i, int dx, int dy); // helper function for available_pawn_positions
+void update_available_pawn_positions(Game *game); // fils available positions with the possible positions
 bool player_can_place_pawn(Game *game, Point p); // TODO: Return true if the player current dragging a pawn can place here 
 void delete_player(Player *player);
 
@@ -138,6 +145,11 @@ void wall_pos_to_pixel_pos(Wall *wall, Point *a, Point *b);
  * @return return true if close enough to a corner 
  */
 bool find_closest_corner(Point *mouse_pos, Point *res);
+
+/**
+ * @brief change the current player playing
+ */
+void change_turn(App *app);
 void draw_game(App *app);
 void draw_players(App *app);
 void draw_walls(App *app);
