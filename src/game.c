@@ -20,11 +20,12 @@ Player *create_player(char name[], Point *base_pos){
     Player *player  = malloc(sizeof(Player));
     strcpy(player->name, name);
     player->pos     = base_pos;
+    player->num_walls = MAX_NUM_WALLS / 2;
 
     return player;
 }
 bool player_can_move_pawn(Player *player, Game *game){
-    return game->current_turn == player;
+    return (game->current_turn == player) && (game->corner_placed->x == -1);
     // return player == game->playerA;
 }
 bool wall_block_path(Game *game, Point a, Point b){
@@ -177,15 +178,17 @@ void delete_wall(Wall *wall){
     free(wall->placed_by);
     free(wall);
 }
-bool wall_placable(Point *a, Point *b){
-    if (a->x == b->x){
-        // check if vertical wall is placable
-        // TODO
-        return abs(a->y - b->y) == 2;
-    } else if (a->y == b->y){
-        // check if horizontal wall is placable
-        // TODO
-        return abs(a->x - b->x) == 2;
+bool wall_placable(App *app, Point *a, Point *b){
+    if (app->game->current_turn->num_walls > 0){
+        if (a->x == b->x){
+            // check if vertical wall is placable
+            // TODO
+            return abs(a->y - b->y) == 2;
+        } else if (a->y == b->y){
+            // check if horizontal wall is placable
+            // TODO
+            return abs(a->x - b->x) == 2;
+        }
     }
     return false;
 }
@@ -285,6 +288,7 @@ void draw_game(App *app){
     }
     SDL_RenderFillRect(app->renderer, &r);
 
+    draw_remaining_tiles(app);
     draw_grid(app);
     draw_walls(app);
     draw_players(app);
@@ -296,7 +300,7 @@ void draw_game(App *app){
         if (game->corner_placed->x == -1 || game->corner_placed->y == -1){
             // not currently placing a wall
             SDL_SetRenderDrawColor(app->renderer, CORNER_HOVER_COLOR);
-        } else if (wall_placable(game->corner_placed, game->corner_hovered)){
+        } else if (wall_placable(app, game->corner_placed, game->corner_hovered)){
             SDL_SetRenderDrawColor(app->renderer, SECOND_COLOR_VALID_COLOR);
         } else {
             SDL_SetRenderDrawColor(app->renderer, SECOND_CORNER_INVALID_COLOR);
@@ -313,6 +317,30 @@ void draw_game(App *app){
     }
 }
 
+void draw_player_remaining_tiles(SDL_Renderer *renderer, int remaining_walls, SDL_Rect *r){
+    int y_delta = GRID_SIZE * GRID_CELL_SIZE / MAX_NUM_WALLS;
+    int start_y = GRID_OFFSET_SIZE + y_delta * MAX_NUM_WALLS/4;
+    r->y = GRID_OFFSET_SIZE;
+    
+    for (int i = 0; i < remaining_walls; i++){
+        r->y = start_y + i * y_delta;
+        SDL_RenderFillRect(renderer, r);
+
+    }
+}
+void draw_remaining_tiles(App *app){
+    SDL_Rect r;
+    
+    // Draw for player A on the left
+    r.x = GRID_OFFSET_SIZE / 2;
+    r.w = GRID_OFFSET_SIZE / 2;
+    r.h = WALL_WIDTH;
+    SDL_SetRenderDrawColor(app->renderer, WALL_COLOR);
+    draw_player_remaining_tiles(app->renderer, app->game->playerA->num_walls, &r);
+
+    r.x = GRID_OFFSET_SIZE + GRID_SIZE * GRID_CELL_SIZE;
+    draw_player_remaining_tiles(app->renderer, app->game->playerB->num_walls, &r);
+}
 void draw_players(App *app){
     Point p;
     Game *game = app->game;

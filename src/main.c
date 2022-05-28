@@ -135,7 +135,7 @@ void handle_events(App *app){
                 app->debug_draw = !app->debug_draw;
             } else if (e.key.keysym.sym == SDLK_ESCAPE){
                 app->continuer = false;
-            }
+            } 
         } else if (e.type == SDL_MOUSEBUTTONDOWN){
             if (e.button.button == SDL_BUTTON_LEFT){
                 // On button press
@@ -158,12 +158,21 @@ void handle_events(App *app){
                         app->game->corner_placed->y = app->game->corner_hovered->y;
                     } else {
                         // placing the entire wall if possible
-                        if (wall_placable(app->game->corner_placed, app->game->corner_hovered)){
+                        if (wall_placable(app, app->game->corner_placed, app->game->corner_hovered)){
                             add_wall_to_game(app->game, app->game->current_turn, *(app->game->corner_placed), *(app->game->corner_hovered));
                             app->game->corner_placed->x = -1;
                             app->game->corner_placed->y = -1;
+
+                            // Change player turn etc
+                            app->game->current_turn->num_walls--; 
+                            change_turn(app);
                         }
                     }
+                }
+            } else if (e.button.button == SDL_BUTTON_RIGHT){
+                if (app->game->corner_placed->x != -1){
+                    app->game->corner_placed->x = -1;
+                    app->game->corner_placed->y = -1;
                 }
             }
         } else if (e.type == SDL_MOUSEBUTTONUP){

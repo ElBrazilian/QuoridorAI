@@ -76,7 +76,9 @@ typedef struct {
 
 typedef struct {
     char name[MAX_NAME_SIZE];
-    Point *pos; 
+    Point *pos;
+
+    int num_walls; 
 } Player;
 
 typedef struct {
@@ -119,13 +121,16 @@ bool player_can_place_pawn(Game *game, Point p); // TODO: Return true if the pla
 void delete_player(Player *player);
 
 // WALL 
+#include "app.h"
 Wall *create_wall(Point *endA, Point *endB, Player *player);
 void delete_wall(Wall *wall);
 void add_wall_to_game(Game *game, Player *player, Point a, Point b);
-bool wall_placable(Point *a, Point *b);
+bool wall_placable(App *app, Point *a, Point *b);
 
-// GAME
-#include "app.h"
+void draw_player_remaining_tiles(SDL_Renderer *renderer, int remaining_walls, SDL_Rect *r);
+void draw_remaining_tiles(App *app);
+
+// GAMEX
 
 Game *create_game(char playerA_name[], Point *playerA_pos, char playerB_name[], Point *playerB_pos);
 void delete_game(Game *game);
