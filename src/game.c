@@ -178,19 +178,78 @@ void delete_wall(Wall *wall){
     free(wall->placed_by);
     free(wall);
 }
-bool wall_placable(App *app, Point *a, Point *b){
-    if (app->game->current_turn->num_walls > 0){
-        if (a->x == b->x){
-            // check if vertical wall is placable
-            // TODO
-            return abs(a->y - b->y) == 2;
-        } else if (a->y == b->y){
-            // check if horizontal wall is placable
-            // TODO
-            return abs(a->x - b->x) == 2;
+int min(int a, int b){
+    if (a > b) return b;
+    return a;
+}
+int max(int a, int b){
+    if (a > b) return a;
+    return b;
+}
+
+void swap_points(Point *a, Point *b){
+    Point tmp = {a->x, a->y};
+    *a = *b;
+    *b = tmp;
+}
+bool intersect(Point a, Point b, Point c, Point d)
+{
+    // trois cas : aligné verticaux, alignés horizontaux, perpendiculaire
+    if ((a.x == b.x && c.y == d.y) || (a.y == b.y && c.x == d.x)){ // ab vertical et cd horizontal
+        if (((a.x + b.x) / 2 == (c.x + d.x) / 2) && ((a.y + b.y) / 2 == (c.y + d.y) / 2)) return true;
+    } else if (a.x == b.x && b.x == c.x && c.x == d.x){ // all vertical
+        // need to check if they have a common point
+        if (a.y > b.y) swap_points(&a, &b);
+        if (c.y > d.y) swap_points(&c, &d);
+        // so if they intersect, 
+        if (a.y < c.y){
+            // intersect if c is between a and b
+            if (a.y < c.y && c.y < b.y) return true;
+        } else {
+            // intersect if a is between c and d
+            if (c.y < a.y && a.y < d.y) return true;
+        }
+    } else if (a.y == b.y && b.y == c.y && c.y == d.y){ // all horizontal
+        // need to check if they have a common point
+        if (a.x > b.x) swap_points(&a, &b);
+        if (c.x > d.x) swap_points(&c, &d);
+        // so if they intersect, 
+        if (a.x < c.x){
+            // intersect if c is between a and b
+            if (a.x < c.x && c.x < b.x) return true;
+        } else {
+            // intersect if a is between c and d
+            if (c.x < a.x && a.x < d.x) return true;
         }
     }
     return false;
+
+}
+
+bool wall_placable(App *app, Point *a, Point *b){
+    // Make sure the player still has wall to place
+    if (app->game->current_turn->num_walls <= 0) return false;
+    
+    // Make sure it has a length of 2
+    if (a->x == b->x){
+        // check if vertical wall is placable
+        // TODO
+        // return abs(a->y - b->y) == 2;
+        if (abs(a->y - b->y) != 2) return false;
+    } else if (a->y == b->y){
+        // check if horizontal wall is placable
+        // TODO
+        if (abs(a->x - b->x) != 2) return false;
+    } else return false;
+
+    for (int i = 0; i < app->game->num_placed_walls; i++){
+        Wall *w = app->game->placed_walls[i];
+        if (intersect(*a, *b, *(w->endA), *(w->endB))){
+            return false;
+        }
+    } 
+    // Make sure it doesnt intersect with another wall
+    return true;
 }
 void add_wall_to_game(Game *game, Player *player, Point a, Point b){
     if (game->num_placed_walls < MAX_NUM_WALLS){
@@ -299,7 +358,11 @@ void draw_game(App *app){
 
         if (game->corner_placed->x == -1 || game->corner_placed->y == -1){
             // not currently placing a wall
-            SDL_SetRenderDrawColor(app->renderer, CORNER_HOVER_COLOR);
+            if (app->game->corner_hovered->x != 0 && app->game->corner_hovered->y != 0 && app->game->corner_hovered->x != GRID_SIZE && app->game->corner_hovered->y != GRID_SIZE){
+                SDL_SetRenderDrawColor(app->renderer, CORNER_HOVER_COLOR);
+            } else {
+                SDL_SetRenderDrawColor(app->renderer, SECOND_CORNER_INVALID_COLOR);
+            }
         } else if (wall_placable(app, game->corner_placed, game->corner_hovered)){
             SDL_SetRenderDrawColor(app->renderer, SECOND_COLOR_VALID_COLOR);
         } else {

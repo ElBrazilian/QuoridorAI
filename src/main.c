@@ -154,11 +154,14 @@ void handle_events(App *app){
 
                     if (app->game->corner_placed->x == -1 || app->game->corner_placed->y == -1){
                         // placing the first corner of the wall
-                        app->game->corner_placed->x = app->game->corner_hovered->x;
-                        app->game->corner_placed->y = app->game->corner_hovered->y;
+                        if (app->game->corner_hovered->x != 0 && app->game->corner_hovered->y != 0 && app->game->corner_hovered->x != GRID_SIZE && app->game->corner_hovered->y != GRID_SIZE){
+                            app->game->corner_placed->x = app->game->corner_hovered->x;
+                            app->game->corner_placed->y = app->game->corner_hovered->y;
+                        }
                     } else {
                         // placing the entire wall if possible
                         if (wall_placable(app, app->game->corner_placed, app->game->corner_hovered)){
+                            printf("add wall\n");
                             add_wall_to_game(app->game, app->game->current_turn, *(app->game->corner_placed), *(app->game->corner_hovered));
                             app->game->corner_placed->x = -1;
                             app->game->corner_placed->y = -1;
