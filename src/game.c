@@ -454,18 +454,20 @@ void draw_walls(App *app){
         wall_pos_to_pixel_pos(game->placed_walls[i], &a, &b);
 
         if (a.y == b.y){
+            if (a.y > b.y) swap_points(&a, &b);
             // horizontal wall
-            r.x = a.x - WALL_WIDTH / 2;
+            r.x = a.x + WALL_OFFSET;
             r.y = a.y - WALL_WIDTH / 2;
-            r.w = GRID_CELL_SIZE * 2 + WALL_WIDTH;
+            r.w = GRID_CELL_SIZE * 2 - 2 * WALL_OFFSET;
             r.h = WALL_WIDTH;
             SDL_RenderFillRect(app->renderer, &r);
         } else {
+            if (a.x > b.x) swap_points(&a, &b);
             // vertical wall
             r.x = a.x - WALL_WIDTH / 2;
-            r.y = a.y - WALL_WIDTH / 2;
+            r.y = a.y + WALL_OFFSET;
             r.w = WALL_WIDTH;
-            r.h = GRID_CELL_SIZE * 2 + WALL_WIDTH;
+            r.h = GRID_CELL_SIZE * 2 - 2 * WALL_OFFSET;
             SDL_RenderFillRect(app->renderer, &r);
         }
     }

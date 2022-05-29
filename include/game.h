@@ -40,6 +40,7 @@
 
 // WALL
 #define WALL_COLOR 0,0,255,255
+#define WALL_OFFSET GRID_CELL_SIZE / 9
 #define WALL_WIDTH (GRID_WIDTH * 16 / 10)
 
 #define PLAYER_RADIUS_PRC 6/10 // prc of the grid size
