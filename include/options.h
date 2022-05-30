@@ -12,7 +12,7 @@
 #ifndef H_OPTIONS
 #define H_OPTIONS
 
-#define SIZE 920
+#define SIZE 700
 #define WIDTH SIZE
 #define HEIGHT SIZE
 

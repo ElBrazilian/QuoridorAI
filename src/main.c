@@ -38,12 +38,12 @@ void initialize_app(App *app){
     app->mouse_pos      = create_point(0,0);
     app->mouse_state    = 0;
 
-    Point a, b;
-    a.x = 1;
-    a.y = 1;
-    b.x = 3;
-    b.y = 1;
-    add_wall_to_game(app->game, app->game->playerA, a, b);
+    // Point a, b;
+    // a.x = 1;
+    // a.y = 1;
+    // b.x = 3;
+    // b.y = 1;
+    // add_wall_to_game(app->game, app->game->playerA, a, b);
     
     // a.x = 2;
     // a.y = 1;
